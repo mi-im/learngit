@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.smbms.dao.UserMapper">
+
+	<resultMap type="User" id="userList">
+		<result property="id" column="id"/>
+		<result property="userCode" column="userCode"/>
+		<result property="userName" column="userName"/>
+		<result property="phone" column="phone"/>
+		<result property="birthday" column="birthday"/>
+		<result property="gender" column="gender"/>
+		<result property="userRole" column="userRole"/>
+		<result property="userRoleName" column="roleName"/>
+	</resultMap>
+
+	<select id="getTotalCount" resultType="Integer" >
+		SELECT COUNT(*) FROM smbms_user
+		<where>
+			<if test="userName!=null">
+				userName like "%"#{userName}"%"
+			</if>
+			<if test="userRole!=null">
+				and userRole = #{userRole}
+			</if>
+		</where>
+	</select>
+	
+	<select id="findUserPage"  resultMap="userList">
+		SELECT u.*,roleName FROM smbms_user u join smbms_role r on r.id=u.userRole
+		<where>
+			<if test="userName!=null">
+				u.userName like "%"#{userName}"%"
+			</if>
+			<if test="userRole!=null ">
+				and u.userRole = #{userRole}
+			</if>
+		</where>
+		LIMIT #{startPage},#{pageSize}
+	</select>
+	
+	<select id="getUser" resultType="User" parameterType="User">
+		SELECT * FROM smbms_user WHERE userCode = #{userCode} AND userPassword=#{userPassword}
+	</select>
+	
+	<select id="getUserById"  resultMap="userList" parameterType="Integer">
+		SELECT u.*,roleName FROM smbms_user u JOIN smbms_role r ON r.id=u.userRole WHERE u.id=#{id}
+	</select>
+	
+	<select id="getUserByName"  resultType="User"  parameterType="String" >
+		SELECT * FROM smbms_user WHERE userCode=#{userCode}
+	</select>
+	
+	<insert id="add" parameterType="User">
+		insert into smbms_user (userCode,userName,userPassword,gender,birthday,phone,
+								address,userRole,createdBy,creationDate) 
+				values (#{userCode},#{userName},#{userPassword},#{gender},#{birthday},#{phone},
+				#{address},#{userRole},#{createdBy},#{creationDate})
+	</insert>
+	
+	<update id="update" parameterType="User">
+		UPDATE smbms_user 
+		<set>
+			userName=#{userName},gender=#{gender},birthday=#{birthday},phone=#{phone},address=#{address},userRole=#{userRole},modifyBy=#{modifyBy},modifyDate=#{modifyDate}
+		</set>
+		<where>
+			id=#{id}
+		</where>
+	</update>
+	
+	<delete id="delUser" parameterType="Integer" >
+		DELETE FROM smbms_user WHERE id=#{id}
+	</delete>
+</mapper>
